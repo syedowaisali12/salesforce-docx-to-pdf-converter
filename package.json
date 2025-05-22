@@ -1,2 +1,14 @@
-npm init -y
-npm install express multer dotenv
+{
+  "name": "salesforce-docx-to-pdf-converter",
+  "version": "1.0.0",
+  "description": "LibreOffice-based DOCX to PDF converter service for Salesforce (Node.js + Docker)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "multer": "^1.4.2"
+  }
+}
