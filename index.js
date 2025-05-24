@@ -16,16 +16,25 @@ const upload = multer({
         fileSize: 50 * 1024 * 1024, // 50MB limit
     },
     fileFilter: (req, file, cb) => {
-        // Check if file is a DOCX
-        const allowedMimeTypes = [
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/octet-stream' // Sometimes DOCX files are sent as octet-stream
+        // Supported file extensions
+        const supportedExtensions = [
+            // Word Documents
+            'doc', 'docx', 'docm', 'dot', 'dotx', 'dotm', 'odt', 'ott', 'fodt', 'rtf', 'txt',
+            // Excel Spreadsheets
+            'xls', 'xlsx', 'xlsm', 'xlt', 'xltx', 'xltm', 'ods', 'ots', 'fods', 'csv',
+            // PowerPoint Presentations
+            'ppt', 'pptx', 'pptm', 'pot', 'potx', 'potm', 'odp', 'otp', 'fodp',
+            // Other formats
+            'html', 'htm'
         ];
         
-        if (allowedMimeTypes.includes(file.mimetype) || file.originalname.toLowerCase().endsWith('.docx')) {
+        // Get file extension
+        const fileExtension = path.extname(file.originalname).toLowerCase().substring(1);
+        
+        if (supportedExtensions.includes(fileExtension)) {
             cb(null, true);
         } else {
-            cb(new Error('Only DOCX files are allowed'), false);
+            cb(new Error(`File type .${fileExtension} is not supported. Supported types: ${supportedExtensions.join(', ')}`), false);
         }
     }
 });
@@ -67,6 +76,23 @@ app.get('/test-libreoffice', (req, res) => {
             version: stdout.trim(),
             timestamp: new Date().toISOString()
         });
+    });
+});
+
+// Get supported file types endpoint
+app.get('/supported-types', (req, res) => {
+    const supportedTypes = {
+        documents: ['doc', 'docx', 'docm', 'dot', 'dotx', 'dotm', 'odt', 'ott', 'fodt', 'rtf', 'txt'],
+        spreadsheets: ['xls', 'xlsx', 'xlsm', 'xlt', 'xltx', 'xltm', 'ods', 'ots', 'fods', 'csv'],
+        presentations: ['ppt', 'pptx', 'pptm', 'pot', 'potx', 'potm', 'odp', 'otp', 'fodp'],
+        other: ['html', 'htm']
+    };
+    
+    res.json({
+        status: 'OK',
+        supportedTypes: supportedTypes,
+        allExtensions: Object.values(supportedTypes).flat(),
+        timestamp: new Date().toISOString()
     });
 });
 
@@ -227,5 +253,6 @@ app.listen(PORT, () => {
     console.log('Available endpoints:');
     console.log(`  GET  /health - Health check`);
     console.log(`  GET  /test-libreoffice - Test LibreOffice installation`);
-    console.log(`  POST /convert - Convert DOCX to PDF`);
+    console.log(`  GET  /supported-types - List supported file types`);
+    console.log(`  POST /convert - Convert documents to PDF`);
 });
